@@ -8,13 +8,13 @@ class NucleotideException(Exception):
         return 'NucleotideError: ' + self.msg
 
 def base_to_bits(base):
-    if base == 'A' or base == 'a':
+    if base == 'A':
         return 0L
-    elif base == 'T' or base == 't':
+    elif base == 'T':
         return 1L
-    elif base == 'G' or base == 'g':
+    elif base == 'G':
         return 2L
-    elif base == 'C' or base == 'c':
+    elif base == 'C':
         return 3L
     else:
         raise NucleotideException('{} is not a nucleotide!'.format(base))
