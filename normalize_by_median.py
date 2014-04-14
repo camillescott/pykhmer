@@ -34,6 +34,8 @@ def main():
     parser.add_argument('-N', dest='nhashes', default=4, type=int)
     args = parser.parse_args()
 
+    print 'Running normalize by median with', args.cutoff, args.ksize, args.htsize, args.nhashes, 'on', args.input_file
+
     cm = kcms(args.ksize, args.htsize, args.nhashes)
 
     normalize_by_median(cm, args.input_file, args.cutoff)
