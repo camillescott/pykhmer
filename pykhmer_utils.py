@@ -2,10 +2,6 @@
 
 # utilities, some borrow from khmer
 
-def iter_kmers(seq, K):
-    for i in xrange(len(seq)-K+1):
-        yield seq[i:i+K]
-
 def calc_expected_collisions(hashtable):
     """Do a quick & dirty expected collision rate calculation on a hashtable.
 

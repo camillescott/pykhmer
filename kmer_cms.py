@@ -3,9 +3,10 @@
 import array
 import sys
 
+from dna_sequence import DNASequence as dna
 from pykhmer_utils import get_n_primes_above_x as get_primes
-from pykhmer_utils import iter_kmers
-from kmer_hash import hash_forward, hash_reverse
+#from kmer_hash import hash_forward, hash_reverse, smhash_forward
+from smhasher import murmur3_x86_64 as smhash
 
 class KMerException(Exception):
     def __init__(self, msg):
@@ -35,19 +36,13 @@ class KMerCountMinSketch(object):
         if len(kmer) != self.ksize:
             raise KMerException('Tried to get count \
                                 with invalid k-mer size')
-        kmer_hashed,_ = hash_forward(kmer, self.ksize)
-        counts = []
-        try:
-            for array_id, table_size in enumerate(self.tablesizes):
-                counts.append(self.count_arrays[array_id][kmer_hashed % table_size])
-        except IndexError as e:
-            print >>sys.stderr, 'error counting kmer', kmer,
-            print >>sys,stderr, e    
 
-        return min(counts)
+        kmer_hashed = smhash(kmer)
+
+        return min(self.count_arrays[i][kmer_hashed % p] for i, p in enumerate(self.tablesizes))
 
     def count(self, kmer):
-        kmer_hashed,_ = hash_forward(kmer, self.ksize)
+        kmer_hashed = smhash(kmer)
         try:
             for array_id, table_size in enumerate(self.tablesizes):
                 self.count_arrays[array_id][kmer_hashed % table_size] += 1        
@@ -56,16 +51,23 @@ class KMerCountMinSketch(object):
             print >>sys,stderr, e
 
     def count_sequence(self, sequence):
-        for n, kmer in enumerate(iter_kmers(sequence, self.ksize)):
-            self.count(kmer)
-        return n
+        count = self.count
+        for n, kmer in enumerate(sequence.kmers(self.ksize)):
+            count(kmer)
+        return n+1
 
     def get_median_count(self, sequence):
-        counts = [self.count(kmer) \
-                    for kmer in iter_kmers(sequence, self.ksize)]
-        counts.sort()
+        get = self.get
+        counts = sorted(get(kmer) \
+                    for kmer in sequence.kmers(self.ksize))
         return counts[len(counts) // 2]
 
-    
-    
-
+    def normalize_by_median(self, seq_gen, cutoff):
+        median = self.get_median_count
+        count_sequence = self.count_sequence
+        for record in seq_gen:
+            seq = dna(record.sequence)
+            if median(seq) < cutoff:
+                yield record
+            else:
+                count_sequence(seq)

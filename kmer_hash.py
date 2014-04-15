@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+from dna_sequence import DNASequence as dna
+from itertools import izip
+from smhasher import murmur3_x86_64 as smhash
+
 class NucleotideException(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -17,7 +21,7 @@ def base_to_bits(base):
     elif base == 'C':
         return 3L
     else:
-        raise NucleotideException('{} is not a nucleotide!'.format(base))
+        raise NucleotideException('{} not a nucleotide'.format(base))
 
 def bits_to_base(n):
     if n == 0L:
@@ -43,19 +47,26 @@ def comp(base):
     else:
         raise NucleotideException('{} is not a nucleotide!'.format(base))
 
-def hash_forward(kmer, K):
+def smhash_forward(kmer):
+
+    return smhash(kmer), 0
+
+def hash_forward(kmer):
     h = 0L
     r = 0L
 
-    h = h | base_to_bits(kmer[0])
-    r = r | base_to_bits(comp(kmer[-1]))
+    hbits = kmer.bits()
+    rbits = kmer.revcomp_bits()
 
-    for i in xrange(1, K):
-        j = K - 1 - i
+    h = h | hbits.next()
+    r = r | rbits.next()
+
+    for hb, rb in izip(hbits, rbits):
         h = h << 2L
         r = r << 2L
-        h = h | base_to_bits(kmer[i])
-        r = r | base_to_bits(comp(kmer[j]))
+        h = h | hb
+        r = r | rb
+
     return h, r
 
 def hash_reverse(hashval, K):
@@ -69,17 +80,17 @@ def hash_reverse(hashval, K):
         val = hashval & 3L
         bases[-i-1] = bits_to_base(val)
 
-    return ''.join(bases)
+    return dna(''.join(bases))
 
 def main():
     print 'testing hash functions...'
-    kmer1 = 'ATCGATCGATCGATCG'
-    kmer2 = 'ATCGATCGATCGATCG'
+    kmer1 = dna('ATCGATCGATCGATCG')
+    kmer2 = dna('ATCGATCGATCGATCG')
     K = 16
-    assert hash_forward(kmer1, K) == hash_forward(kmer2, K)
+    assert hash_forward(kmer1) == hash_forward(kmer2)
 
-    h1, r1 = hash_forward(kmer1, K)
-    h2, r2 = hash_forward(kmer2, K)
+    h1, r1 = hash_forward(kmer1)
+    h2, r2 = hash_forward(kmer2)
     assert kmer1 == hash_reverse(h1, K)
     assert hash_reverse(r1, K) == 'CGATCGATCGATCGAT'
     assert hash_reverse(r1, K) == hash_reverse(r2, K)
