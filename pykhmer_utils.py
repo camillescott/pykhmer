@@ -1,6 +1,20 @@
 #!/usr/bin/env python
 
-# utilities, some borrow from khmer
+from dna_sequence import DNASequence as dna
+import random
+
+bases = ['A', 'T', 'C', 'G']
+def rand_dna(L):
+    s = bases * (L // 4)
+    random.shuffle(s)
+    return dna(''.join(s))
+
+def rand_dnas(n, L=100):
+    r = rand_dna
+    for i in xrange(n):
+        yield rand_dna(L)
+
+# utilities, some borrowed from khmer
 
 def calc_expected_collisions(hashtable):
     """Do a quick & dirty expected collision rate calculation on a hashtable.
