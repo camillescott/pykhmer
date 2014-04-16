@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from smhasher import murmur3_x64_128 as smhash
 
 class DNASequence(str):
     
@@ -41,3 +42,7 @@ class DNASequence(str):
             yield DNASequence(self[i:i+K])
 
 
+    def kmers_hashed(self, K):
+        h = smhash
+        for i in xrange(len(self)-K+1):
+            yield h(self[i:i+K])
