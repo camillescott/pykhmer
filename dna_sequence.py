@@ -41,7 +41,6 @@ class DNASequence(str):
         for i in xrange(len(self)-K+1):
             yield DNASequence(self[i:i+K])
 
-
     def kmers_hashed(self, K):
         h = smhash
         for i in xrange(len(self)-K+1):

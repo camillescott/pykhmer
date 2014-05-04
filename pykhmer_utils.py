@@ -14,6 +14,29 @@ def rand_dnas(n, L=100):
     for i in xrange(n):
         yield rand_dna(L)
 
+def fasta_generator(n, L):
+    for i, seq in enumerate(rand_dnas(n, L)):
+        yield '>Seq {}'.format(i), seq
+
+class KMerException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return 'KMerException: ' + self.msg
+
+class NucleotideException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__():
+        return 'NucleotideError: ' + self.msg
+
+def zeros(n, dtype=np.uint8):
+    while(n > 0):
+        yield dtype(0)
+        n = n - 1
+
 # utilities, some borrowed from khmer
 
 def calc_expected_collisions(hashtable):
