@@ -99,7 +99,7 @@ class KMerCountMinSketch(object):
         for i, p in enumerate(self.primes):
             try:
                 counts[i][kh % p] += 1
-            except ValueError, OverflowError:
+            except (ValueError, OverflowError):
                 pass
 
     def count_sequence(self, sequence):
@@ -109,7 +109,7 @@ class KMerCountMinSketch(object):
             for i, p in enumerate(primes):
                 try:
                     counts[i][kh % p] += 1
-                except ValueError, OverflowError:
+                except (ValueError, OverflowError):
                     pass
 
     def n_occupied(self):
@@ -132,5 +132,5 @@ class KMerCountMinSketch(object):
                     for i, p in enumerate(primes):
                         try:
                             counts[i][kh % p] += 1
-                        except ValueError, OverflowError:
+                        except (ValueError, OverflowError):
                             pass
